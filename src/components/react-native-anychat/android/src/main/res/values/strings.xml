@@ -1,0 +1,8 @@
+<resources>
+
+    <string name="app_name">anychat</string>
+    <string name="HelloTitle">"Hello AnyChat"</string>
+    <string name="endCall1">End call</string>
+    <string name="end_session">结束通话</string>
+
+</resources>

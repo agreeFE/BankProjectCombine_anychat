@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.com.agree.idcamera" >
+
+
+    <application>
+        <activity
+            android:name="com.wildma.idcardcamera.camera.CameraActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"/>
+    </application>
+</manifest>

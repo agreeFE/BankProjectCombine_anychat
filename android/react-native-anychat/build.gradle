@@ -1,0 +1,54 @@
+apply plugin: 'com.android.library'
+
+android {
+
+    useLibrary 'org.apache.http.legacy'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        ndk {
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+    dependencies {
+        //compile fileTree(dir: 'libs', include: ['*.jar'])
+        implementation 'com.android.support:appcompat-v7:27+'
+
+        implementation "com.facebook.react:react-native:+"
+
+        implementation 'com.google.code.gson:gson:2.8.2'
+        //下面两个是RxJava 和 RxAndroid
+        implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+        implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
+        compile files('libs/anychat-sdk.jar')
+        // compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
+        implementation 'com.alibaba:fastjson:1.1.36'
+    }
+

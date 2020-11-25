@@ -1,0 +1,4 @@
+rootProject.name = 'BankProject'
+include ':react-native-idcamera', ':react-native-imei', ':react-native-anychat'
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+include ':app'

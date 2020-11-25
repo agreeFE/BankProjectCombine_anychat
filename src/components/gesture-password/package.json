@@ -1,0 +1,16 @@
+{
+  "author": {
+    "name": "liuxiaobin",
+    "email": "15797670370m@sina.cn"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "prop-types": "^15.6.0"
+  },
+  "main": "source/index.js",
+  "name": "gesture-password",
+  "peerDependencies": {
+    "react-native": ">=15.5"
+  },
+  "version": "1.0.0"
+}

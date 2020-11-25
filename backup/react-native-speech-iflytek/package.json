@@ -1,0 +1,53 @@
+{
+  "_args": [
+    [
+      "react-native-speech-iflytek@1.0.4",
+      "/Users/lupengyu/mobilebank/source/client/BankProjectCombine"
+    ]
+  ],
+  "_from": "react-native-speech-iflytek@1.0.4",
+  "_id": "react-native-speech-iflytek@1.0.4",
+  "_inBundle": false,
+  "_integrity": "sha1-OIMe1U7C3HdljXBENzl3+Vby1Kw=",
+  "_location": "/react-native-speech-iflytek",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "react-native-speech-iflytek@1.0.4",
+    "name": "react-native-speech-iflytek",
+    "escapedName": "react-native-speech-iflytek",
+    "rawSpec": "1.0.4",
+    "saveSpec": null,
+    "fetchSpec": "1.0.4"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npm.taobao.org/react-native-speech-iflytek/download/react-native-speech-iflytek-1.0.4.tgz",
+  "_spec": "1.0.4",
+  "_where": "/Users/lupengyu/mobilebank/source/client/BankProjectCombine",
+  "author": {
+    "name": "zphhhhh"
+  },
+  "bugs": {
+    "url": "https://github.com/zphhhhh/react-native-speech-iflytek/issues"
+  },
+  "dependencies": {},
+  "description": "Speech module based on iflytekSpeech for react native",
+  "homepage": "https://github.com/zphhhhh/react-native-speech-iflytek#readme",
+  "keywords": [
+    "speech"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "react-native-speech-iflytek",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zphhhhh/react-native-speech-iflytek.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.4"
+}

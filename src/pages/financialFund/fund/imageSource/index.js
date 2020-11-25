@@ -1,0 +1,8 @@
+export const BACK = require('$image/balance/back.svg')
+export const ELLIPSIS = require('$image/balance/ellipsis.svg')
+export const BACK_BG_HEAD = require('$image/balance/back_bg_head.png')
+export const FUND_BG = require('$image/accountNew/fund_bg.png')
+export const SHOUYIMINGXI = require('$image/accountNew/shouyimingxi.png')
+export const JIAOYIJILU = require('$image/accountNew/jiaoyijilu.png')
+export const EYE_SHOW = require('$image/accountNew/eyeShow.svg')
+export const EYE_CLOSE = require('$image/accountNew/eyeClose.svg')

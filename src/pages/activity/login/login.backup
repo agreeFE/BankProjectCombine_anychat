@@ -1,0 +1,491 @@
+import React, { Component } from 'react';
+import { StyleSheet, View, Text, PixelRatio, StatusBar, Image, DeviceEventEmitter, TextInput, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
+import TouchID from 'react-native-touch-id';
+import LinearGradient from "react-native-linear-gradient"
+import { NavigationEvents } from 'react-navigation';
+// import ActionSheet from 'react-native-actionsheet'; //弹窗
+const px2rn = px => PixelRatio.roundToNearestPixel(px);
+const rem2rn = rem => px2rn(rem * 16);
+
+import scope from '@/scope'
+import '@/window'
+const NetworkUtil = require('$/util/networkutil');
+const router = require('$/router-control');
+
+const tokenutil = require('$/util/tokenutil');
+
+const CANCEL_INDEX = 0;
+import SVG from "$/components/Svg";
+
+
+
+module.exports = class Login extends Component<{}> {
+  constructor(props) {
+    super(props);
+    scope(this);
+    var omap = {};
+    omap[this.props.navigation.state.routeName] = this;
+    $.instanceList.push(omap);
+
+    this.state = {
+      options: ['取消'],
+      fingerToken: '2',
+      faceToken: '2',
+      gestureToken: '2',
+      // 默认登录超时时间：5分钟
+      defaultLoginTimeout: 300000,
+      // 用户名
+      username: window.userPhone || '17600169392',
+      // username: window.userPhone || '13812345672',
+      // 密码
+      password: '123456',
+      // 登录方式
+      loginWay: '0',
+      // 目标路由名称
+      destRouter: props.navigation.state.params.params ? props.navigation.state.params.params.routername : '',
+      // 传参
+      destParams: props.navigation.state.params.params ? JSON.parse(props.navigation.state.params.params.params) : {}
+    }
+
+    window.loginTimeOut = this.state.defaultLoginTimeout;
+
+    this.loginWay = this.loginWay.bind(this);
+    this.verifyFaceTokenLogin = this.verifyFaceTokenLogin.bind(this);
+    this.verifyFingerLogin = this.verifyFingerLogin.bind(this);
+    this.verifyGestureLogin = this.verifyGestureLogin.bind(this);
+    this.loginByPwd = this.loginByPwd.bind(this);
+    this.usernameChange = this.usernameChange.bind(this);
+    this.passwordChange = this.passwordChange.bind(this);
+    this.configureLoginWay = this.configureLoginWay.bind(this);
+    this.setBioLogin = this.setBioLogin.bind(this);
+    this.setGestureLogin = this.setGestureLogin.bind(this);
+    this.setPwdLogin = this.setPwdLogin.bind(this);
+    this.onClosePress = this.onClosePress.bind(this);
+    this.handlePress = this.handlePress.bind(this);
+  }
+  componentDidMount() {
+    const _this = this;
+    _this.loginWay();
+    // _this.verifyFaceTokenLogin();
+
+    // // 如果设备支持指纹识别，启用指纹登录
+    // TouchID.isSupported().then(result => {
+    //   if (result === true || result === "TouchID") {
+    //     // 指纹登录
+    //     _this.setState({
+    //       options: ["指纹登录", "取消"]
+    //     });
+
+    //     _this.setBioLogin();
+    //   } else if (result === "FaceID") {
+    //     // FaceID登录
+    //     _this.setState({
+    //       options: ["FaceID登录", "取消"]
+    //     });
+    //     _this.setBioLogin();
+    //   } 
+    // });
+  }
+  render() {
+    return (
+      <View style={styles.container}>
+        <NavigationEvents
+          onDidFocus={() => { StatusBar.setBarStyle('dark-content') }}>
+        </NavigationEvents>
+        {/* <StatusBar></StatusBar> */}
+        <Image source={require('$image/login/zhanghaoguanli.png')} style={styles.backgroundImage} />
+        {/* <TouchableOpacity style={{ position: 'absolute', top: 60, width: 25, height: 25, right: 25, }} onPress={this.onClosePress}>
+          <SVG source={require('$image/login/close.svg')} style={{ width: 16, height: 16 }} />
+        </TouchableOpacity> */}
+        <Text style={styles.welcome}>你好，欢迎回来</Text>
+        <View>
+          <View>
+            <TextInput
+              style={styles.username}
+              placeholder="手机号/卡号/一网通用户"
+              placeholderTextColor="#C9C9C9"
+              keyboardType="numeric"
+              value={this.state.username}
+              onChangeText={this.usernameChange}></TextInput>
+          </View>
+          <View>
+            <TextInput
+              style={styles.password}
+              placeholder="密码"
+              placeholderTextColor="#C9C9C9"
+              secureTextEntry
+              value={this.state.password}
+              onChangeText={this.passwordChange}></TextInput>
+          </View>
+          <View>
+            <Text style={styles.forgotPassword}>忘记密码</Text>
+          </View>
+
+          <View style={{ width: '100%', textAlign: 'center' }}>
+            <TouchableWithoutFeedback onPress={this.loginByPwd}>
+              <LinearGradient style={{ width: '84%', marginHorizontal: '8%', height: 50, borderRadius: 25, marginTop: 50, justifyContent: 'center', alignItems: 'center' }} colors={window.$globalStyle.buttonLinerBackground}>
+                <Text style={styles.loginBtn}>登录</Text>
+              </LinearGradient>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={{ marginTop: '5%', flexDirection: 'row', height: 30, justifyContent: 'center' }}>
+            <Text style={{ fontSize: 15, lineHeight: 21, color: '#666666', textAlign: 'right' }}>注册新账号</Text>
+            <Text style={{ width: '5%', fontSize: 15, lineHeight: 21, color: '#666666', textAlign: 'center' }}>|</Text>
+            <Text onPress={this.more} style={{ fontSize: 15, lineHeight: 21, color: '#666666', textAlign: 'left' }}>更多</Text>
+          </View>
+        </View>
+        {/* <ActionSheet
+                            ref={(o) => this.ActionSheet = o}
+                            title="选择登录方式"
+                            options={this.state.options}
+                            cancelButtonIndex={CANCEL_INDEX}
+                            onPress={this.handlePress.bind(this)}
+                        /> */}
+      </View>
+    );
+  }
+  loginWay() {
+    const _this = this;
+    $Storage.load({
+      key: 'loginWay'
+    }).then(loginResult => {
+      console.warn('333',loginResult)
+      // 如果设备支持指纹识别，启用指纹登录
+      TouchID.isSupported().then(result => {
+        if (result === true || result === "TouchID") {
+          if ((JSON.parse(loginResult).fingerUnlock == '1')) {
+            // 指纹登录
+            _this.setState({
+              options: ["指纹登录", "取消"]
+            });
+            _this.setBioLogin();
+          }
+        } else if (result === "FaceID") {
+          if ((JSON.parse(loginResult).faceUnlock == '1')) {
+            // FaceID登录
+            _this.setState({
+              options: ["FaceID登录", "取消"]
+            });
+            _this.setBioLogin();
+          }
+        }
+      });
+
+
+
+    });
+  }
+  //展示下部弹窗选择
+  more = () => {
+    const _this = this;
+    // _this.ActionSheet.show()
+    window.$ActionSheet.showActionSheetWithOptions({
+      title: '选择登录方式',
+      options: _this.state.options,
+      cancelButtonIndex: 4,
+      //destructiveButtonIndex: 0,
+      tintColor: '#1567E5',
+    },
+      (buttonIndex) => {
+        _this.handlePress(buttonIndex);
+      }
+    );
+  }
+  //弹窗选择登录方式
+  handlePress(info) {
+    let way = (this.state.options[info])
+    if (way == '账号登录') {
+      console.warn('账号登录')
+    } else if (way == '指纹登录') {
+      console.warn('指纹登录')
+      this.setBioLogin();
+    } else if (way == 'FaceID登录') {
+      console.warn('FaceID登录')
+      this.setBioLogin();
+    } else {
+      console.warn('取消')
+    }
+  }
+  /**
+   * 验证是否支持FaceID登录
+   * @author 孟庆云
+   */
+  verifyFaceTokenLogin() {
+    const _this = this
+
+    $Storage.load({
+      key: 'faceToken'
+    }).then(result => {
+      console.warn('FaceID开通Token: ', result)
+      if (result && tokenutil.verifyToken(result)) {
+        _this.setState({
+          faceToken: '1'
+        })
+        _this.configureLoginWay()
+      } else if (!result) {
+        // 没有FaceToken，验证指纹登录
+        _this.verifyFingerLogin()
+      }
+    }).catch(err => {
+      // 没有读取到FaceToken数据，验证指纹登录
+      _this.verifyFingerLogin()
+    })
+  }
+  /**
+   * 验证是否支持TouchID登录
+   * @author 孟庆云
+   */
+  verifyFingerLogin() {
+    const _this = this
+
+    $Storage.load({
+      key: 'fingerToken'
+    }).then(result => {
+      console.warn('FaceID开通Token: ', result)
+      if (result && tokenutil.verifyToken(result)) {
+        _this.configureLoginWay()
+      } else if (!result) {
+        // 没有FingerToken，验证手势登录
+        _this.verifyGestureLogin()
+      }
+    }).catch(err => {
+      // 没有FingerToken，验证手势登录
+      _this.verifyGestureLogin()
+    })
+  }
+  /**
+   * 验证是否支持手势登录
+   * @author 孟庆云
+   */
+  verifyGestureLogin() {
+    const _this = this
+
+    $Storage.load({
+      key: 'gestureToken'
+    }).then(result => {
+      console.warn('Gesture开通Token: ', result)
+      if (result && tokenutil.verifyToken(result)) {
+        _this.setState({
+          gestureToken: '1'
+        })
+      }
+      _this.configureLoginWay()
+    }).catch(err => {
+      _this.configureLoginWay()
+    })
+  }
+  /**
+   * 设置登录方式
+   */
+  configureLoginWay() {
+    console.warn('设置登录方式，0-密码，1-手势，2-指纹，3-人脸');
+
+    let loginWay = '0';
+    if (this.state.gestureToken === '1') {
+      loginWay = '1'
+    }
+    if (this.state.fingerToken === '1') {
+      loginWay = '2'
+    }
+    if (this.state.faceToken === '1') {
+      loginWay = '3'
+    }
+
+    console.warn('登录方式: ', loginWay)
+    //设置更多登录选项
+    if (this.state.fingerToken == '1' || this.state.faceToken == '1') {
+      if (this.state.gestureToken === '1') {
+        this.setState({
+          options: ['取消', '生物识别', '手势登录'],
+        })
+      } else {
+        this.setState({
+          options: ['取消', '生物识别'],
+        })
+      }
+    } else if (this.state.gestureToken === '1') {
+      this.setState({
+        options: ['取消', '手势登录'],
+      })
+    }
+
+
+
+
+    // 如果是指纹/人脸识别，需要检测生物识别是否通过
+    if (loginWay === '3' || loginWay === '2') {
+      this.setBioLogin();
+    } else if (loginWay === '1') {
+      // 登录方式为手势
+      this.setGestureLogin();
+    } else {
+      // 密码登录
+      this.setPwdLogin();
+    }
+  }
+  setBioLogin() {
+    console.warn('登录方式为指纹/人脸，需要检查设备是否支持指纹/人脸登录')
+    const _this = this
+    TouchID.isSupported().then(result => {
+      if (result) {
+        let title = '', sensor = '';
+        if (result === 'FaceID') {
+          title = 'FaceID登录认证'
+          sensor = '请正视摄像头'
+        } else {
+          title = '指纹登录认证'
+          sensor = '请按压指纹传感器'
+        }
+        TouchID.authenticate('', {
+          title: title,
+          cancelText: '取消',
+          sensorDescription: sensor,
+          imageColor: window.$globalStyle.buttonLinerBackground[0]
+        }).then(authResult => {
+          console.warn('识别结果: ', authResult)
+          if (authResult) {
+            console.warn('校验生物识别结果: ', authResult)
+            _this.loginByPwd()
+
+          }
+        }).catch(err => {
+          console.warn('识别错误/放弃识别', err)
+        })
+      } else {
+        // 当前设备不支持生物识别登录(硬件损坏等原因)
+        _this.setPwdLogin()
+      }
+    })
+  }
+  setGestureLogin() {
+    console.warn('登录方式为手势')
+  }
+  setPwdLogin() {
+    console.warn('登录方式为密码')
+  }
+  /**
+   * 用户名值改变事件处理函数
+   */
+  usernameChange(text) {
+    this.setState({
+      username: text
+    })
+  }
+  /**
+   * 密码值改变事件处理函数
+   */
+  passwordChange(password) {
+    this.setState({
+      password: password
+    })
+  }
+  /**
+   * 用户名/密码登录
+   * @author 孟庆云
+   */
+  loginByPwd() {
+    const _this = this
+    const data = {
+      username: this.state.username,
+      password: this.state.password
+    };
+    // debugger
+    console.log('/oauth/token', '')
+    NetworkUtil.networkService('/oauth/token', data, (response) => {
+      console.log('/user/info', '')
+      NetworkUtil.networkService('/user/info', {}, (resp) => {
+        $Storage.save({
+          key: 'userInfo',
+          data: JSON.stringify(resp)
+        });
+        
+        $Toast.success('登录成功！')
+        if (window.userPhone && window.userPhone !== _this.state.username) {
+          router.replace('homeScrollable')
+          window.bankCard = undefined
+          window.bankInfo = undefined
+          window.userName = resp.cnName
+          window.idCard = resp.idCard
+          window.userPhone = resp.phone
+        } else {
+          window.userName = resp.cnName
+          window.userPhone = resp.phone
+          if (_this.state.destRouter) {
+            StatusBar.setBarStyle('light-content')
+            router.replace(_this.state.destRouter, _this.state.destParams);
+          } else {
+            router.back();
+            // 从util/networkutil.js中传入的路由goBack后执行的函数(重发一次请求)
+            if (_this.props.navigation.state.params.afterGoBack) {
+              _this.props.navigation.state.params.afterGoBack()
+            }
+          }
+        }
+        NetworkUtil.networkService('/user/setting/list', {}, (response) => {
+          // console.warn('时长', response.timeout)
+          DeviceEventEmitter.emit('getTimeOut', response.timeout)
+        })
+      })
+    });
+  }
+  /**
+   * 点击右上角关闭按钮
+   */
+  onClosePress() {
+    router.back()
+  }
+};
+
+const styles = StyleSheet.create({
+  container: {},
+  backgroundImage: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    marginTop: '6.6%',
+    marginLeft: '-12.5%'
+  },
+  welcome: {
+    color: $globalStyle.mine.textColor,
+    fontFamily: 'PingFangSC-Medium',
+    fontSize: 22,
+    marginLeft: '10.7%',
+    marginTop: '40%',
+    lineHeight: 30
+  },
+  username: {
+    marginLeft: '10.7%',
+    width: '78.7%',
+    marginTop: '10.9%',
+    fontFamily: 'PingFangSC-Medium',
+    fontSize: 16,
+    lineHeight: 22,
+    borderBottomColor: '#F1F1F1',
+    borderBottomWidth: 1
+  },
+  password: {
+    marginLeft: '10.7%',
+    width: '78.7%',
+    marginTop: '10%',
+    fontFamily: 'PingFangSC-Medium',
+    fontSize: 16,
+    lineHeight: 22,
+    borderBottomColor: '#F1F1F1',
+    borderBottomWidth: 1
+  },
+  forgotPassword: {
+    width: '15%',
+    fontFamily: 'PingFangSC-Medium',
+    fontSize: 14,
+    color: '#999999',
+    lineHeight: 20,
+    marginLeft: '74%',
+    marginTop: '2%'
+  },
+  loginBtn: {
+    fontFamily: 'PingFangSC-Medium',
+    fontSize: 18,
+    lineHeight: 25,
+    color: '#FFFFFF',
+  }
+});

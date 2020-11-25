@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>分组 5</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <circle id="path-1" cx="13" cy="13" r="13"></circle>
+        <filter x="-9.6%" y="-5.8%" width="119.2%" height="119.2%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="0.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="1" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feMorphology radius="1" operator="erode" in="SourceAlpha" result="shadowInner"></feMorphology>
+            <feOffset dx="0" dy="1" in="shadowInner" result="shadowInner"></feOffset>
+            <feComposite in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"></feComposite>
+            <feGaussianBlur stdDeviation="0.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.908338306   0 0 0 0 0.926499688   0 0 0 0 0.955383716  0 0 0 1 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="收支明细" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="2-收支明细" transform="translate(-232.000000, -255.000000)">
+            <g id="分组-4" transform="translate(234.000000, 256.000000)">
+                <g id="分组-5">
+                    <g id="椭圆形-copy-6" fill-rule="nonzero">
+                        <use fill="white" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                        <use stroke="#E4E6F3" stroke-width="1" xlink:href="#path-1"></use>
+                    </g>
+                    <g id="chazhao" transform="translate(7.000000, 7.000000)" fill="#666666">
+                        <path d="M5.00010606,10 C2.24302658,10 0,7.75699582 0,4.99994386 C0,2.24300419 2.24302657,0 5.00010606,0 C7.75697343,0 10,2.24300418 10,4.99994386 C10,7.75699582 7.75697343,10 5.00010606,10 Z M5.00010606,0.871490544 C2.72367691,0.871490544 0.871511729,2.72353741 0.871511729,4.99994386 C0.871511729,7.27646259 2.72367691,9.12849698 5.00010606,9.12849698 C7.27653522,9.12849698 9.12848828,7.27645011 9.12848828,4.99994386 C9.12848828,2.72353742 7.27653522,0.871490544 5.00010606,0.871490544 Z" id="形状" fill-rule="nonzero"></path>
+                        <path d="M10.5644326,11 C10.4529949,11 10.3415448,10.9574718 10.256473,10.8724031 L8.12760769,8.74348826 C7.9574641,8.57346293 7.9574641,8.29762852 8.12760769,8.12760319 C8.29775129,7.9574656 8.57337094,7.9574656 8.74351454,8.12760319 L10.8723923,10.256518 C11.0425359,10.4265433 11.0425359,10.7023777 10.8723923,10.8724031 C10.7873205,10.9574719 10.6758828,11 10.5644326,11 Z" id="路径"></path>
+                        <path d="M5,8 C3.62488969,8 2.50345408,7.02234987 2,5.38491105 L2.88997193,5 C3.25651394,6.19249198 4.02565428,6.87641081 5,6.87641081 L5,8 L5,8 Z" id="路径"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

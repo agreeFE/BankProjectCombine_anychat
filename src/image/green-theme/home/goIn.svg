@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="116px" height="40px" viewBox="0 0 116 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>编组 2</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="124.099457%" id="linearGradient-1">
+            <stop stop-color="#3481A5" offset="0%"></stop>
+            <stop stop-color="#1F4C61" offset="100%"></stop>
+        </linearGradient>
+        <rect id="path-2" x="0" y="0" width="108" height="32" rx="16"></rect>
+        <filter x="-6.5%" y="-15.6%" width="113.0%" height="143.8%" filterUnits="objectBoundingBox" id="filter-3">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.244171565   0 0 0 0 0.516560786   0 0 0 0 0.640738225  0 0 0 0.29878715 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="首页" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="2-首页长图" transform="translate(-129.000000, -235.000000)">
+            <g id="编组-2" transform="translate(133.000000, 237.000000)">
+                <g id="矩形">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-2"></use>
+                    <use fill="url(#linearGradient-1)" fill-rule="evenodd" xlink:href="#path-2"></use>
+                </g>
+                <text id="立即参与" font-family="PingFangSC-Medium, PingFang SC" font-size="13" font-weight="400" fill="#FFFFFF">
+                    <tspan x="28" y="21">立即参与</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

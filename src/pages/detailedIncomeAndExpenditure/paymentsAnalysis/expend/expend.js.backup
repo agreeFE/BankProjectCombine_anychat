@@ -1,0 +1,268 @@
+import React, { , Component } from 'react';
+import LinearGradient from 'react-native-linear-gradient'
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  Text,
+  StatusBar,
+  Image,
+  Animated,
+  TouchableWithoutFeedback,
+  ART,
+  ScrollView,
+  BVLinearGradient,
+  Button,
+  Dimensions
+} from 'react-native';
+import MoneyInfo from '../sector/MoneyInfo'
+import Range from '../range/range'
+import { PAYMENTS_SECTORBG } from '../../imageSource/index'
+
+class Payments extends Component {
+  constructor() {
+    super()
+    let expendData = [
+      { item: "旅行", expendMoney: "2246" },
+      { item: "其他", expendMoney: "3456" },
+      { item: "日常", expendMoney: "2357" },
+      { item: "购物", expendMoney: "4312" },
+      { item: "零食", expendMoney: "2551" },
+      { item: "其余", expendMoney: "2312" },
+    ];
+    // 计算支出的总金额
+    let totalExpend = expendData.reduce((total, ele) => {
+      return total + parseFloat(ele.expendMoney)
+    }, 0)
+    // 计算扇形图各支出所占百分比
+    let expendPercentArr = [];
+    expendData.forEach(ele => {
+      expendPercentArr.push(parseFloat((ele.expendMoney / totalExpend).toFixed(2)))
+    })
+    this.state = {
+      expendData: expendData,
+      curIndex: 0,
+      expendType: expendData[0].item,
+      expendMoney: expendData[0].expendMoney,
+      totalExpend: 0,
+      expendPercentArr: expendPercentArr, //支出百分比数组
+      rotateDegree: "0deg", //扇形旋转角度
+      handledClickCircleIndex: -1, //被点击的圆环索引
+      sectorPercentageArray: [expendPercentArr[0], 1 - expendPercentArr[0]], //扇形百分比所占数组
+      clickRangeIndex: 0
+    }
+  }
+
+  componentWillMount() {
+    // 计算支出的总金额
+    let totalExpend = this.state.expendData.reduce((total, ele) => {
+      return total + parseFloat(ele.expendMoney)
+    }, 0)
+    // 计算扇形图各支出所占百分比
+    let expendPercentArr = [];
+    this.state.expendData.forEach(ele => {
+      expendPercentArr.push(parseFloat((ele.expendMoney / totalExpend).toFixed(2)))
+    })
+    // 计算扇形图所需转动角度
+    let rotateDegree = -360 * this.state.sectorPercentageArray[0] / 2 + 'deg';
+    this.setState({
+      totalExpend: totalExpend,
+      rotateDegree: rotateDegree
+    })
+  }
+  range = [];
+
+  componentDidMount() {
+    this.range[0].circleAnimate(0)
+  }
+  render() {
+    // 计算扇形图各支出所占百分比
+    let expendPercentArr = [];
+    this.state.expendData.forEach(ele => {
+      expendPercentArr.push(parseFloat((ele.expendMoney / this.state.totalExpend).toFixed(2)))
+    })
+    // 计算扇形图所需转动角度
+    let rotateDegree = -360 * this.state.sectorPercentageArray[0] / 2 + 'deg';
+    return (
+      <>
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <View style={styles.title}>
+            <Text style={styles.titleItem}>支出</Text>
+            <View>
+              <Text style={styles.titleItem}>￥ {this.state.totalExpend}</Text>
+            </View>
+          </View>
+          <View>
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+              {/* 资金信息展示区 */}
+              <View>
+                {/*  */}
+                <View style={{ position: 'relative', alignItems: 'center' }}>
+                  {/* 扇形图 */}
+                  <TouchableWithoutFeedback onPress={this.sectorClick}>
+                    <View style={{ transform: [{ rotateZ: rotateDegree }] }}>
+                      <MoneyInfo expendPercentArr={this.state.sectorPercentageArray}></MoneyInfo>
+                    </View>
+                  </TouchableWithoutFeedback>
+                  {/* 百分比大字展示 */}
+                  <TouchableWithoutFeedback onPress={this.sectorClick}>
+                    <Text style={styles.percentBigText}>{(this.state.sectorPercentageArray[0] * 100).toFixed(0)}%</Text>
+                  </TouchableWithoutFeedback>
+                  {/* 扇形图背景图 */}
+                  <Image style={{ position: 'absolute', zIndex: -1 }} source={PAYMENTS_SECTORBG}></Image>
+                  {/* 支出详情展示区 */}
+                  <LinearGradient style={[styles.capitalDisplay]} colors={['#fff', '#f6f6f6']}>
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={styles.expendType}>{this.state.expendType}</Text>
+                      <Text style={styles.expendMoney}>￥{this.state.expendMoney}</Text>
+                    </View>
+                  </LinearGradient>
+                  {/* <BoxShadow setting={shadowOpt}> */}
+                  <Text style={styles.viewDetails}>点击扇形图，可查看详情</Text>
+                  {/* </BoxShadow> */}
+                </View>
+              </View>
+              <View style={styles.expendClassification}>
+                {/* 支出分类区 */}
+                {
+                  this.state.expendData.map((ele, index) => {
+                    let percent = (ele.expendMoney / this.state.totalExpend * 100).toFixed(0)
+                    return (
+                      <TouchableWithoutFeedback key={ele.item} onPress={() => { this.setIndex(index) }}>
+                        <View style={[styles.expendCircle, styles.textCenter]}>
+                          <Range ref={(view) => this.range.push(view)} clickRangeIndex={this.state.curIndex}>
+                            <Text>{ele.item}</Text>
+                            <Text>{percent}%</Text>
+                          </Range>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    )
+                  })
+                }
+              </View>
+            </View>
+          </View>
+        </View>
+      </>
+    )
+  }
+  // componentDidMount() {
+  //   this.setState({
+
+  //   })
+  // }
+  setIndex = (index) => {
+    if (index == this.state.handledClickCircleIndex) {
+      return
+    }
+    this.setState((state, props) => {
+      // 改变扇形百分比展示
+      let expendPercentArr = state.expendPercentArr,
+        diffValue = 1 - expendPercentArr[index], //剩余的百分比
+        changeArr = [expendPercentArr[index], diffValue]; //传出去的数组,元素第一位为要展示的百分比
+      return ({
+        // 改变扇形区的支出种类、金额
+        expendType: state.expendData[index].item,
+        expendMoney: state.expendData[index].expendMoney,
+        sectorPercentageArray: changeArr,
+        handledClickCircleIndex: index,
+        curIndex: index
+      })
+    })
+    this.range[index].circleAnimate(index)
+  }
+  sectorClick = () => {
+    alert("点击扇形")
+  }
+}
+// 设置阴影数据
+const shadowOpt = {
+  width: 200,
+  height: 50,
+  color: "#000",
+  border: 2,
+  radius: 3,
+  opacity: 0.2,
+  x: 0,
+  y: 0,
+}
+const styles = StyleSheet.create({
+  percentBigText: {
+    position: "absolute",
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: '700',
+    marginTop: 13
+    // width: 100,
+  },
+  // 扇形区
+  capitalDisplay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 133,
+    height: 133,
+    borderRadius: 133 / 2,
+    position: 'absolute',
+    alignContent: 'center',
+    left: 56,
+    top: 56
+  },
+  expendMoney: {
+    fontSize: 15,
+    color: '#3A3A3A',
+    fontWeight: '700',
+    marginTop: 5
+  },
+  expendType: {
+    fontSize: 15,
+    color: '#3A3A3A',
+  },
+  viewDetails: {
+    fontSize: 13,
+    color: '#999999',
+    marginTop: -60,
+    textAlign: 'center',
+    backgroundColor: '#f6f6f6',
+    position: 'relative'
+  },
+  title: {
+    width: 327,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignContent: 'center',
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  titleItem: {
+    fontSize: 18,
+    color: '#3A3A3A',
+    fontWeight: '700'
+  },
+  expendCircle: {
+    width: 48,
+    height: 48,
+    marginRight: 24,
+    marginLeft: 24,
+    marginBottom: 24,
+    backgroundColor: 'transparent'
+
+  },
+  textCenter: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  expendClassification: {
+    width: 288,
+    height: 220,
+    marginTop: -25,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    alignContent: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+})
+
+export default Payments

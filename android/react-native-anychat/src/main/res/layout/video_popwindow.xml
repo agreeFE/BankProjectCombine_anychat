@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_back"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <LinearLayout
+        android:id="@+id/video_session"
+        android:orientation="vertical"
+        android:background="@drawable/ztkj"
+        android:layout_width="match_parent"
+        android:layout_height="800dp">
+
+        <FrameLayout
+            android:id="@+id/fl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <SurfaceView
+                android:id="@+id/surface_remote"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <LinearLayout
+                android:id="@+id/frame_local_area"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top|right"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/video_bg"
+                android:orientation="vertical"
+                android:padding="3dip" >
+
+                <SurfaceView
+                    android:id="@+id/surface_local"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_gravity="center"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/bg_blue"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/endCall"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_background"
+                android:onClick="onEndCall"
+                android:text="@string/endCall1"
+                android:textColor="#ffffff" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/trans_white" />
+
+            <ImageButton
+                android:id="@+id/btn_speakControl"
+                android:layout_width="52dp"
+                android:layout_height="fill_parent"
+                android:background="@drawable/button_background"
+                android:src="@drawable/speak_on"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/trans_white" />
+
+            <ImageButton
+                android:id="@+id/btn_cameraControl"
+                android:layout_width="52dp"
+                android:layout_height="fill_parent"
+                android:background="@drawable/button_background"
+                android:src="@drawable/camera_on"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/trans_white" />
+
+            <ImageButton
+                android:id="@+id/ImgSwichVideo"
+                android:layout_width="52dp"
+                android:layout_height="fill_parent"
+                android:background="@drawable/button_background"
+                android:src="@drawable/switchvideo" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/option"
+            android:textSize="20dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/optiondetail"
+            android:layout_marginTop="10dp"
+            android:textSize="20dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_progress"
+            android:layout_marginTop="10dp"
+            android:textSize="20dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:max="100"
+            android:layout_marginTop="10dp"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:progressDrawable="@drawable/progress_color"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</RelativeLayout>

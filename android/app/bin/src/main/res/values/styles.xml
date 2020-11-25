@@ -1,0 +1,20 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.ReactNative.AppCompat.Light.NoActionBar.FullScreen">
+        <!-- Customize your theme here. -->
+        <item name="android:textColor">#000000</item>
+        <!-- 适配Android 8.0 全透明Activity无法设置screenOrientation的问题 -->
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <!-- 适配Android P刘海屏 -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <style name="SplashScreen_SplashTheme" parent="Theme.ReactNative.AppCompat.Light.NoActionBar.FullScreen">
+        <item name="android:windowAnimationStyle">@style/SplashScreen_SplashAnimation</item>
+    </style>
+
+</resources>

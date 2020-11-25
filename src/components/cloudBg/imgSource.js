@@ -1,0 +1,1 @@
+export const BG = require('$image/cloudTeller/cloudTellerBg.png')

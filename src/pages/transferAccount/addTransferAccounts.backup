@@ -1,0 +1,698 @@
+import React, { Component,  } from 'react';
+import { NavigationEvents } from 'react-navigation';
+import { View, StyleSheet, Text, ScrollView, ActivityIndicator, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard, Image, TextInput } from 'react-native';
+import Header from '$/components/header'
+import Picker from '$/components/picker/pickerPro.js'
+import CardPick from '$/components/cardPick'
+import { OPEN, LIUYAN2, TONGXUNLU3, CLOSE, RIGHTARROW } from './imageSource'
+import LinearGradient from "react-native-linear-gradient"
+import { getYearMouthDayLine } from '$/util/dateutil'
+import scope from '$/scope'
+import SVG from "$/components/Svg";
+
+const DateUtil = require('$/util/dateutil');
+
+const NetworkUtil = require('$/util/networkutil');
+const router = require('$/router-control');
+const { getBankCard } = require('$/util/bankCardutil');
+const { mobilePhoneTest } = require("$/util/regexutil");
+const { checkValidity } = require('$/util/moneyutil')
+
+const PICKDATA = []
+
+class addTransferAccounts extends Component {
+
+  constructor(props) {
+    super(props)
+    scope(this)
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1 < 10 ? `0${(date.getMonth() + 1)}` : date.getMonth() + 1
+    const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
+    const today = `${year}年${month}月${day}日`
+    const moneyTextArr = ['百', '千', '万', '十万', '百万', '千万', '亿', '十亿', '百亿', '千亿', '万亿', '十万亿']
+    for (var i = 1; i < 29; i++) {
+      PICKDATA.push(i)
+    }
+    this.state = {
+      isLoading: true,
+      moneyTextArr,
+      curCircleItem: 2, //当前的转账周期选择值
+      dealModalVisible: false,//交易密码模态框显隐
+      curTab: 1, //当前的转账方式选择值
+      defaultDate: today, //默认日期
+      onceRepayData: DateUtil.getYearMonthDayArray(2019, 2039), //用于pickers的年月日数据
+      year,
+      month,
+      day,
+      transferCircleData: ['仅一次', '每月一次'], // 转出周期数据
+      selectedtransferCircleValue: ['每月一次'], // 转出周期默认选择值
+      selectedEveryMonthDateValue: [PICKDATA[0]],
+      selectedOnceDateValue: [`${year}年`, `${month}月`, `${day}日`],
+      amountColor: false, //超限变色
+      selectedDateValue: [PICKDATA[0]],
+      showModal: false, //是否显示模态框
+      selectCardIndex: 0,
+      cardList: [],
+      payeeCardNum: '', // 银行卡账号
+      payee_name: '', //账户名
+      payee_card_bank: '', //转账银行
+      transferAmount: '',
+      payeePhone: '',
+      transferRemark: '',
+      trade_password: '',//支付密码
+    }
+    
+  }
+  componentDidMount() {
+    getBankCard(this.getCardList)
+  }
+  // 返回上一步
+  back = () => {
+    router.back()
+  }
+  // 按钮点击
+  tapButton = (index) => {
+    this.setState({
+      curTab: index == 1 ? 2 : 1
+    })
+  }
+  // 显示模态框
+  toggleModal = (index) => {
+    Keyboard.dismiss()
+    if (index == 1) {
+      this.oncePicker.toggle()
+    } else if (index == 2) {
+      this.everyMonthPicker.toggle()
+    } else if (index == 3) {
+      this.transferCirclePicker.toggle()
+    }
+  }
+
+  toggleCardModal = () => {
+    Keyboard.dismiss()
+    setTimeout(() => {
+      this.cardPick.toggleModal()
+    }, 20)
+  }
+
+  getCard = ({ index, item }) => {
+    this.setState({
+      selectCardIndex: index
+    })
+  }
+  // 供每月选择框使用
+  getData = (item) => {
+    this.setState({
+      selectedEveryMonthDateValue: item
+    })
+  }
+  // 供仅一次选择框使用
+  getOnceData = (item) => {
+    this.setState({
+      selectedOnceDateValue: item
+    })
+  }
+  // 供转账周期选择框使用
+  getOnceTransferCircle = (item) => {
+    let { transferCircleData } = this.state
+    let index = transferCircleData.indexOf(item[0])
+    this.cicleItemChange(index + 1)
+    this.setState({
+      selectedtransferCircleValue: item
+    })
+  }
+  //确定添加计划
+  addTransferplan = () => {
+    let { payeeCardNum, transferAmount, selectedOnceDateValue, defaultDate, selectedtransferCircleValue, 
+      payeePhone, cardList,selectCardIndex } = this.state
+
+    if (!payeeCardNum) {
+      $Toast.info('请输入收款人银行卡号')
+      return
+    }
+    if (!transferAmount) {
+      $Toast.info('请输入金额')
+      return
+    }
+    if (Number(transferAmount) > 50000) {
+      $Toast.info('金额超限')
+      return
+    }
+    
+    payeeCardNum = payeeCardNum.replace(/[^\d]+/g, '')
+    let pattern = /^([1-9]{1})(\d{14}|\d{18})$/
+    if (!pattern.test(payeeCardNum)) {
+      $Toast.info('银行卡号输入有误！')
+      return
+    }
+    if(payeeCardNum === cardList[selectCardIndex].cardNo) {
+      $Toast.info('付款卡和收款卡不能为同一张卡')
+      return
+    }
+    if (payeePhone && !mobilePhoneTest(payeePhone)) {
+      $Toast.info('请输入正确的手机号')
+      return
+    }
+    let compareSelectedOnceDateValue = selectedOnceDateValue.join('').replace(/[\u4e00-\u9fa5]/g, ''),
+      compareDefaultDate = defaultDate.replace(/[\u4e00-\u9fa5]/g, '')
+    if (selectedtransferCircleValue[0] == "仅一次" && compareSelectedOnceDateValue <= compareDefaultDate) {
+      $Toast.info('预约转账日期不能小于或等于今天日期')
+      return
+    }
+    this.setState({
+      dealModalVisible: true
+    })
+  }
+  // 添加预约转账计划接口
+  addBookTransfer = () => {
+    const { curTab, payeeCardNum,trade_password, payee_name, payee_card_bank, selectedOnceDateValue, selectedEveryMonthDateValue, curCircleItem, transferAmount, cardList, selectCardIndex, transferRemark, } = this.state
+    // let pattern = /^([1-9]{1})(\d{14}|\d{18})$/
+    //     if (!pattern.test(payeeCardNum)) {
+    //       $Toast.info('银行卡号输入有误！')
+    //       return
+    //     }
+ 
+    // 处理转账日期
+    let transferDate;
+    if (curCircleItem == 1) {
+      transferDate = selectedOnceDateValue.join('').replace(/[\u4e00-\u9fa5]/g, '-').slice(0, -1)
+    } else if (curCircleItem == 2) {
+      transferDate = selectedEveryMonthDateValue[0]
+    }
+
+    let info = {
+      transfer_alias: '交房租',
+      transfer_cycle: curCircleItem,
+      transfer_way: curTab === 1 ? 2 : 1,
+      transfer_date: transferDate,
+      transfer_enddate: '',
+      payee_name,
+      payee_card_no: payeeCardNum.replace(/[^\d]+/g, ''),
+      payee_card_bank,
+      payer_card_no: cardList[selectCardIndex].cardNo,
+      payer_card_bank: '赞同科技',
+      transfer_amount: transferAmount,
+      transfer_remark: transferRemark,
+      transfer_type: '3',
+      trade_password: trade_password
+    }
+    console.warn(info)
+    // this.setState({trade_password: ''})
+    // NetworkUtil.networkService('/account/transferplan/add', info, response => {
+    //   $Toast.info('添加成功')
+    //   setTimeout(() => {
+    //     router.back()
+    //   }, 1000)
+    // })
+  }
+  // 获取用户银行卡列表
+  getCardList = (cardArr) => {
+    const { cardList } = this.state
+    // account/bankcard/list
+    cardArr.map((item) => {
+      cardList.push({ value: `${item.card_bank}(${item.card_no.substr(-4)})`, cardNo: item.card_no })
+    })
+    this.setState({ cardList, isLoading: false })
+  }
+  //支付弹窗按钮
+  payClick = (index) => {
+    const { trade_password, } = this.state
+    if (index == 1) {
+      this.setState({ dealModalVisible: false, trade_password: '' });
+    } else if (index == 2) {
+
+      if (trade_password.length < 6) {
+        $Toast.info('请输入交易密码')
+        return
+      }
+      this.addBookTransfer()
+      this.setState({ dealModalVisible: false });
+    } else {
+      // if (Number(transfer_amount) > Number(payCard.acc_bal)) {
+      //   $Toast.info('转账金额超限')
+      //   return
+      // }
+      this.setState({ dealModalVisible: true });
+    }
+  }
+  changeText = (event, num) => {
+    switch (num) {
+      case 0:
+        // this.setState({
+        //   payeeCardNum: event,
+        // })
+        break;
+      case 1:
+        // 金额有小数点情况
+        let dealText = '';
+        let pointIndex = event.indexOf('.');
+        dealText = pointIndex > -1 ? event.slice(0, pointIndex) : event;
+        this.setState({
+          dealTextLength: dealText.length,
+          transferAmount: checkValidity(event),
+          amountColor: event > 50000
+        })
+        break;
+      case 2:
+        const newText = event.replace(/[^\d]+/, '');
+        this.setState({
+          payeePhone: newText,
+        })
+        break;
+      case 3:
+        this.setState({
+          transferRemark: event,
+        })
+        break;
+    }
+  }
+  trade_passwordChange = (text) => {
+    this.setState({ trade_password: text })
+  }
+  cicleItemChange = (index) => {
+    this.setState({
+      curCircleItem: index
+    })
+  }
+  payeeAuto = () => {
+    let info = window.chosenCardInfo
+    if (!info) return
+    this.setState({
+      payee_name: info.payee_name,//户名
+      payeeCardNum: info.payee_card_no.replace(/\D/g,''),//账号
+      payee_card_bank: info.payee_card_bank
+    })
+  }
+  componentWillUnmount() {
+    window.chosenCardInfo = null
+  }
+
+  render() {
+    const { onceRepayData, amountColor, transferCircleData, selectedtransferCircleValue,
+      payee_name, payee_card_bank, dealTextLength,moneyTextArr, isLoading,
+      trade_password, selectedOnceDateValue, selectedEveryMonthDateValue, curTab, cardList = [],
+      selectCardIndex, payeeCardNum, transferAmount, payeePhone, curCircleItem, transferRemark } = this.state
+    let cardNo = (cardList[selectCardIndex] && cardList[selectCardIndex].cardNo) || ''
+    let cardInfo = cardNo.substr(0, 4) + '****' + cardNo.substr(-4)
+    let noOpacity = !!payeeCardNum && !!transferAmount
+    return (
+      <View style={{ flex: 1, backgroundColor: "#f6f6f6" }}>
+        <NavigationEvents onWillFocus={payload => { this.payeeAuto() }}></NavigationEvents>
+        {/* 标题栏 */}
+        <Header
+          title={'添加预约转账'}
+          leftClick={this.back}
+        ></Header>
+        {/* 内容区 */}
+        <KeyboardAvoidingView behavior="absolute" style={{ flex: 1 }} enabled>
+          <ScrollView keyboardShouldPersistTaps={'always'}>
+            <View style={[styles.content]}>
+              {/* tab按钮 */}
+              <View style={[styles.tabArea]}>
+                <TouchableWithoutFeedback onPress={() => { this.tapButton(2) }}>
+                  <View style={[styles.tabButton, curTab == 1 ? styles.active : '']}>
+                    <Text style={[styles.tabText, curTab == 1 ? styles.active : '', { fontSize: 16 }]}>自动转账</Text>
+                    <Text style={[styles.tabText, curTab == 1 ? styles.active : '', { fontSize: 14 }]}>在指定日期自动转出</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback onPress={() => { this.tapButton(1) }}>
+                  <View style={[styles.tabButton, curTab == 2 ? styles.active : '']}>
+                    <Text style={[styles.tabText, curTab == 2 ? styles.active : '', { fontSize: 16 }]}>仅提醒</Text>
+                    <Text style={[styles.tabText, curTab == 2 ? styles.active : '', { fontSize: 14 }]}>提醒后可手动转出</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+              {/* <View style={styles.cicleChoose}>
+                <Text onPress={() => { this.cicleItemChange(1) }} style={[styles.cicleItem, curCircleItem == 1 ? styles.active : '']}>仅一次</Text>
+                <Text onPress={() => { this.cicleItemChange(2) }} style={[styles.cicleItem, curCircleItem == 2 ? styles.active : '']}>每月一次</Text>
+              </View> */}
+              {/* 转账日期选择 */}
+              {
+                curCircleItem == 2 ?
+                  <TouchableWithoutFeedback onPress={() => { this.toggleModal(2) }}>
+                    <View style={styles.dateChoose}>
+                      <Text style={{ fontSize: 22, color: '#333333', lineHeight: 27 }}>
+                        每月<Text style={{ color: '#E9962F' }}>{selectedEveryMonthDateValue[0]}</Text>日
+                  </Text>
+                      {/* <Image source={OPEN} style={styles.openStyle}></Image> */}
+                      <SVG style={[{ height: 12, width: 6, marginLeft: 7 }]} source={RIGHTARROW} />
+                    </View>
+                  </TouchableWithoutFeedback>
+                  :
+                  <TouchableWithoutFeedback onPress={() => { this.toggleModal(1) }}>
+                    <View style={styles.dateChoose}>
+                      <Text style={{ fontSize: 22, color: '#333333', lineHeight: 27 }}>
+                        <Text style={{ color: '#E9962F' }}>{selectedOnceDateValue[0].replace(/[\u4e00-\u9fa5]/g, '')}</Text>年
+                        <Text style={{ color: '#E9962F' }}>{selectedOnceDateValue[1].replace(/[\u4e00-\u9fa5]/g, '')}</Text>月
+                        <Text style={{ color: '#E9962F' }}>{selectedOnceDateValue[2].replace(/[\u4e00-\u9fa5]/g, '')}</Text>日
+                      </Text>
+                      {/* <Image source={OPEN} style={styles.openStyle}></Image> */}
+                      <SVG style={[{ height: 12, width: 6, marginLeft: 7 }]} source={RIGHTARROW} />
+                    </View>
+                  </TouchableWithoutFeedback>
+              }
+              {/* 选择框 */}
+              <View style={styles.chooseBoxArea}>
+                <TouchableWithoutFeedback onPress={() => { router.load('transferMyFriend', { goback: 1 }) }}>
+                  <View style={[styles.chooseBox, { height: payeeCardNum ? 60 : 45 }]}>
+                    <Text style={{ color: ' #333333' }}>转入银行卡</Text>
+                    {
+                      payeeCardNum ?
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                          <Text>{payee_name}</Text>
+                          <Text style={{color: '#ccc'}}>{payee_card_bank} {`尾号${payeeCardNum.substr(-4)}` }</Text>
+                        </View>
+                        :
+                        <Text style={{ flex: 1, textAlign: 'right', padding: 0, color: '#999' }}>{'请输入银行卡号'}</Text>
+                    }
+
+                    {/* <Text style={{ flex: 1, textAlign: 'right', padding: 0,color: payeeCardNum ? '#000' : '#999'}}>{payeeCardNum || '请输入银行卡号'}</Text> */}
+                    <SVG style={[{ height: 12, width: 6, marginLeft: 7 }]} source={RIGHTARROW} />
+                  </View>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback onPress={this.toggleCardModal}>
+                  <View style={styles.chooseBox}>
+                    <Text style={{ color: ' #333333' }}>转出银行卡</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      {
+                        isLoading ?
+                        <ActivityIndicator color="#777" />
+                        :
+                        <Text style={{ color: '#000' }}>{cardInfo}</Text>
+                      }
+                      <SVG style={[{ height: 12, width: 6, marginLeft: 7 }]} source={RIGHTARROW} />
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback onPress={() => { this.toggleModal(3) }}>
+                  <View style={styles.chooseBox}>
+                    <Text style={{ color: ' #333333' }}>转出日期</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text style={{ color: '#000' }}>{selectedtransferCircleValue}</Text>
+                      <SVG style={[{ height: 12, width: 6, marginLeft: 7 }]} source={RIGHTARROW} />
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+              {/* 交租金额输入框 */}
+              <View style={styles.moneyInput}>
+                <Text style={styles.inputTitle}>转账金额</Text>
+                <View style={[styles.inputBox,{position:'relative'}]}>
+                  {
+                    dealTextLength > 2 ?
+                      <View style={{ position: 'absolute', top: -1, left: 40, borderLeftColor: '#ddd', borderLeftWidth: 1 }}>
+                        <Text style={{ color: '#666', fontSize: 12, marginLeft: 5 }}>
+                          {moneyTextArr[dealTextLength - 3]}
+                        </Text>
+                      </View>
+                      :
+                      <></>
+                  }
+                  <Text style={{ fontSize: 25 }}>￥</Text>
+                  <View style={{ position: 'relative', height: 65, width: '100%', justifyContent: 'center' }}>
+                    {
+                      !transferAmount ?
+                        <Text style={{ position: 'absolute', color: '#999', width: 100, fontSize: 15, marginLeft: 8 }}>0 手续费</Text>
+                        :
+                        <></>
+                    }
+                    <TextInput
+                      underlineColorAndroid='transparent'
+                      autoFocus={false}
+                      placeholderTextColor='#999'
+                      value={transferAmount}
+                      keyboardType='numeric'
+                      maxLength={14}
+                      style={{ fontSize: 24, alignContent: 'center', flex: 1, color: amountColor ? 'red' : '#000' }}
+                      onChangeText={(event) => { this.changeText(event, 1) }}
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+            {/* 自动转账附加按钮 */}
+            {curTab == 1 ?
+              <View>
+                {/* 选择框 */}
+                <View style={styles.additionInputBox}>
+                  <View style={[styles.additionInput, { borderBottomColor: '#F0F0F0', borderBottomWidth: 1 }]}>
+                    <Text style={{ color: '#3A3A3A', fontWeight: 'bold' }}>短信通知</Text>
+                    <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', flex: 1 }}>
+                      <TextInput
+                        underlineColorAndroid='transparent'
+                        autoFocus={false}
+                        placeholder='请输入对方手机号'
+                        placeholderTextColor='#999'
+                        value={payeePhone}
+                        keyboardType='numeric'
+                        style={{ fontSize: 15, alignContent: 'center', marginRight: 10, textAlign: 'right', padding: 0, flex: 1 }}
+                        onChangeText={(event) => { this.changeText(event, 2) }}
+                        maxLength={11}
+                      />
+                      <SVG source={TONGXUNLU3} style={{ width: 16, height: 16 }}></SVG>
+                    </View>
+                  </View>
+                  <View style={styles.additionInput}>
+                    <Text style={{ color: '#3A3A3A', fontWeight: 'bold' }}>转账附言</Text>
+                    <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end', flex: 1 }}>
+                      <TextInput
+                        underlineColorAndroid='transparent'
+                        autoFocus={false}
+                        placeholder='转账'
+                        placeholderTextColor='#999'
+                        value={transferRemark}
+                        style={{ fontSize: 15, alignContent: 'center', marginRight: 10, textAlign: 'right', padding: 0, flex: 1 }}
+                        onChangeText={(event) => { this.changeText(event, 3) }}
+                      />
+                      <SVG source={LIUYAN2} style={{ width: 16, height: 16 }}></SVG>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              :
+              <></>}
+
+            {/* 确定按钮 */}
+            <View style={styles.tapConfirmArea}>
+              <TouchableWithoutFeedback onPress={this.addTransferplan}>
+                <LinearGradient style={[styles.tapConfirmWrapper, noOpacity ? '' : { opacity: 0.5, backgroundColor: '#ddd' }]} colors={$globalStyle.buttonLinerBackground}>
+                  <Text style={styles.tapConfirm}>确定</Text>
+                </LinearGradient>
+              </TouchableWithoutFeedback>
+            </View>
+          </ScrollView>
+          {/* 每月转账日期选择 */}
+          <Picker
+            ref={ref => this.everyMonthPicker = ref}
+            pickerData={PICKDATA}
+            selectedValue={selectedEveryMonthDateValue}
+            onPickerConfirm={this.getData}
+            onPickerCancel={() => { }}
+          ></Picker>
+          {/* 仅一次转账日期选择 */}
+          <Picker
+            ref={ref => this.oncePicker = ref}
+            pickerData={onceRepayData}
+            selectedValue={selectedOnceDateValue}
+            onPickerConfirm={this.getOnceData}
+            onPickerCancel={() => { }}
+          ></Picker>
+          {/* 转账周期选择 */}
+          <Picker
+            ref={ref => this.transferCirclePicker = ref}
+            pickerData={transferCircleData}
+            selectedValue={selectedtransferCircleValue}
+            onPickerConfirm={this.getOnceTransferCircle}
+            onPickerCancel={() => { }}
+          ></Picker>
+          {/* 银行卡选择 */}
+          <CardPick
+            ref={ref => this.cardPick = ref}
+            cardList={cardList}
+            selectIndex={selectCardIndex}
+            onConfirm={this.getCard}
+            onCancel={() => { }}
+          ></CardPick>
+        </KeyboardAvoidingView >
+        {
+          this.state.dealModalVisible ?
+            <View style={{ position: 'absolute', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={{ height: 322, width: 343, alignItems: 'center', backgroundColor: 'white', borderRadius: 5 }}>
+                <View style={{ height: 48, borderBottomColor: '#EBEBEB', borderBottomWidth: 1, width: '100%', alignItems: 'center', flexDirection: 'row' }}>
+                  <Text style={{ fontSize: 17, color: '#333333', textAlign: 'center', width: '80%', marginLeft: '10%' }}>请输入交易密码</Text>
+                  <TouchableWithoutFeedback onPress={() => { this.payClick(1) }} >
+                    <View style={{ width: 20, height: 20, justifyContent: 'center', alignItems: "center", }}>
+                      <SVG style={{ width: 12, height: 12 }} source={CLOSE} />
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+                <View style={{ height: 155, width: '100%', alignItems: 'center' }}>
+                  {/* 33333333 */}
+                  <Text style={{ fontFamily: 'PingFangSC-Regular', fontSize: 15, color: '#333333', marginTop: 16 }}>{payee_name}
+                    <Text style={{ fontFamily: 'PingFangSC-Regular', fontSize: 15, color: '#666666' }}>{`(${payee_card_bank})`}</Text>
+                  </Text>
+                  <Text style={{ fontFamily: 'PingFangSC-Regular', fontSize: 15, color: '#333333', marginTop: 10 }}>{payeeCardNum}</Text>
+
+                  <Text style={{ fontFamily: 'Arial-BoldMT', fontSize: 20, color: '#333333', marginTop: 16, }}>¥
+                    <Text style={{ fontWeight: 'bold', fontSize: 26 }}>{transferAmount}</Text>
+                  </Text>
+                  <Text style={{ fontFamily: 'PingFangSC-Regular', fontSize: 13, color: '#999999', marginTop: 16 }}>请输入一卡通<Text style={{ color: '#E9962F' }}>{`${cardList[selectCardIndex].cardNo.substr(0, 4)}********${cardList[selectCardIndex].cardNo.substr(-4)}`}</Text>取款密码</Text>
+                </View>
+                <View style={{ height: 52, width: 317, }}>
+                  <View style={{ position: 'absolute', width: '100%', height: "100%", justifyContent: 'center', borderColor: '#E2E2E2', borderWidth: 1, flexDirection: "row" }}>
+                    {
+                      new Array(6).fill('').map((item, index) => (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', borderLeftWidth: index === 0 ? 0 : 1, borderLeftColor: '#E2E2E2' }}>
+                          <Text>{trade_password.substr(index, 1) && '*'}</Text>
+                        </View>
+                      ))
+                    }
+                  </View>
+                  <TextInput keyboardType='numeric' autoFocus={true} caretHidden={true} maxLength={6} secureTextEntry={true} style={{ fontSize: 20, color: 'transparent' }} value={trade_password} onChangeText={this.trade_passwordChange}></TextInput>
+                </View>
+                <TouchableWithoutFeedback onPress={() => { this.payClick(2) }} >
+                  <LinearGradient colors={$globalStyle.buttonLinerBackground} style={[styles.subbutView, trade_password.length == 6 ? '' : { opacity: 0.5, backgroundColor: '#ddd' }]}>
+                    <Text style={{ color: "#FFFFFF", textAlign: 'center', fontSize: 15, fontFamily: 'PingFangSC-Medium' }}>确认转账</Text>
+                  </LinearGradient>
+                </TouchableWithoutFeedback>
+              </View>
+            </View>
+            :
+            <></>
+        }
+      </View>
+    )
+  }
+}
+
+const styles = StyleSheet.create({
+  cicleItem: {
+    fontSize: 16,
+    textAlign: 'center',
+    borderColor: '#7AA2AB',
+    borderWidth: 1,
+    borderRadius: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginRight: 10,
+    color: '#7AA2AB'
+  },
+  cicleChoose: {
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    width: 327,
+    marginTop: 15
+  },
+  subbutView: {
+    height: 38,
+    width: '90%',
+    backgroundColor: '#E9962F',
+    justifyContent: 'center',
+    borderRadius: 5,
+    marginTop: 16
+  },
+  additionInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 45,
+    paddingHorizontal: 20
+  },
+  additionInputBox: {
+    backgroundColor: '#fff',
+    marginTop: 10,
+  },
+  tapConfirmArea: {
+    paddingHorizontal: 20,
+    marginTop: 60
+  },
+  tapConfirmWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 45,
+    borderRadius: 5
+  },
+  tapConfirm: {
+
+    fontSize: 17,
+    color: '#fff'
+  },
+  inputBox: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginLeft: 20,
+    marginTop: 16
+  },
+  inputTitle: {
+    fontSize: 16,
+    color: '#3A3A3A',
+    fontWeight: '800',
+    left: 20,
+    top: 10
+  },
+  moneyInput: {
+    width: '100%'
+  },
+  chooseBoxArea: {
+    marginTop: 31,
+    width: '100%'
+  },
+  chooseBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomColor: '#F0F0F0',
+    borderBottomWidth: 1,
+    paddingHorizontal: 20,
+    height: 45
+  },
+  openStyle: {
+    marginLeft: 7
+  },
+  dateChoose: {
+    marginTop: 32,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  modal: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0
+  },
+  tabArea: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 327,
+    height: 60,
+    borderWidth: 1,
+    borderColor: $globalStyle.reservation.chosenColor,
+    borderRadius: 4,
+    marginTop: 16
+  },
+  tabText: {
+    color: $globalStyle.reservation.chosenColor
+  },
+  tabButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%'
+  },
+  active: {
+    backgroundColor: $globalStyle.reservation.chosenColor,
+    color: '#fff'
+  },
+  content: {
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    position: 'relative',
+    // flex: 1,
+    backgroundColor: '#fff'
+  }
+})
+module.exports = addTransferAccounts;

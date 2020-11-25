@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name_debug">调试基座</string>
+    <string name="app_name_blue">手机银行蓝色</string>
+    <string name="app_name_green">手机银行绿色</string>
+</resources>

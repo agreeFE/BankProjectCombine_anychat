@@ -1,0 +1,4 @@
+# Referenced at D:\Development\CTMB\BankProjectCombine\android\app\build\intermediates\merged_manifests\debug\AndroidManifest.xml:97
+-keep class androidx.core.app.CoreComponentFactory { <init>(); }
+# Referenced at D:\Development\CTMB\BankProjectCombine\android\app\build\intermediates\merged_manifests\debug\AndroidManifest.xml:97
+-keep class com.bankproject.MainApplication { <init>(); }

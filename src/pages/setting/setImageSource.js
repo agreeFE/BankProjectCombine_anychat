@@ -1,0 +1,8 @@
+export const BACK_BG = require('$image/quotaApply/backBG.png')
+export const BACK = require('$image/balance/back.svg')
+export const ELLIPSIS = require('$image/balance/ellipsis.svg')
+export const BACK_BG_HEAD = require('$image/balance/back_bg_head.png')
+export const HEADPORTRAIT = require('$image/home/my/headPortrait.png')
+export const RIGHTARROW = require('$image/home/my/right_arrow.png')
+export const AGREElOGO = require('$image/agree.svg')
+export const CHECK = require('$image/home/my/check.png')

@@ -1,0 +1,17 @@
+{
+  "name": "react-native-scrollable-tab-view-modules",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react-native-deprecated-custom-components": "^0.1.2",
+    "react-native-scrollable-tab-view": "0.10.0"
+  },
+  "devDependencies": {},
+  "jest": {
+    "preset": "react-native"
+  }
+}
